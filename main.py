@@ -1,6 +1,7 @@
 from clean import *
 from ml import *
 
+# Example of ml project
 clean = Clean()
 clean.clean_df(r'C:\Users\mxr29\Desktop\ML_TEST\wine.csv', drop_method=0)
 #clean.auto_format(0, auto=False)
