@@ -45,25 +45,75 @@ class Clean:
                 row_bool = True
                 print("***** %d rows removed with any NAN *****" % (row_len_0 - row_len_1))
 
-            if col_bool == False and row_bool == False:
+            if col_bool is False and row_bool is False:
                 print('No rows or columns were dropped due to Nan')
         print('--------------------------------------------------------------')
 
     # segment to either auto format columns or go through individually to convert to usable format
     def format(self, level, format_type=0, col=None, auto=False):
+
+        def label_encode_nominal(col_in):
+            self.df[col_in] = le.fit_transform(self.df[col_in].astype(str))
+            print(self.df[col_in])
+            sleep(1.5)
+
+        def map_ordinal(col_in):
+            mapping_bool = False
+            map_list = None
+            while mapping_bool is False:
+                map_dic = {}
+                working = False
+                while working is False:
+                    map_list = []
+                    print(self.df[col_in].unique())
+                    input_string = input('Enter mapping list separated by space ')
+                    print("\n")
+                    user_list = input_string.split()
+
+                    # convert each item to int type
+                    for s in range(len(user_list)):
+                        # convert each item to int type
+                        map_list.append(int(user_list[s]))
+                    if len(map_list) != len(self.df[col_in].unique()):
+                        print("len of values or format doesn't seem to match... \n")
+                    else:
+                        working = True
+
+                for q in range(len(self.df[col_in].unique())):
+                    map_dic[self.df[col_in].unique()[q]] = map_list[q]
+                print(map_dic, '\n')
+                final_check = input('Does the mapping look correct 0 for yes 1 for no: \n')
+                if final_check == '0':
+                    self.df[col_in] = self.df[col_in].map(map_dic)
+                    print(self.df[col_in])
+                    sleep(1.5)
+                    mapping_bool = True
+                else:
+                    pass
+
+        def set_target(col_in):
+            self.df['Target'] = self.df[col_in]
+            self.df = self.df.drop(axis=1, columns=[col_in])
+
+        def drop_col(col_in):
+            self.df = self.df.drop(axis=1, columns=[col_in])
+            print('\n')
+            print('Column Dropped')
+            sleep(1.5)
+
         print('\n')
         print('--------------------------------------------------------------')
 
         # this is basic conversion of data and target selection going through each column manually
-        if level == 0 and auto == False:
+        if level == 0 and auto is False:
             # loops through each column
             j = len(self.df.columns)
-            l = 0
+            counter = 0
             for col in self.df:
                 col_bool = False
-                while col_bool == False:
-                    print("Column number %d out of %d" % (l, j), '\n')
-                    l += 1
+                while col_bool is False:
+                    print("Column number %d out of %d" % (counter, j), '\n')
+                    counter += 1
                     # prints out column info
                     print(self.df[col].head, '\n')
 
@@ -75,63 +125,33 @@ class Clean:
                         print(self.df[col].unique(), '\n')
 
                     method = input(
-                        "Enter:  \n 0 for pass \n 1 for nominal features \n 2 for ordinal \n 3 One Hot \n 4 for target \n 6 for drop: \n ")
+                        "Enter:  \n 0 for pass \n 1 for nominal features \n 2 for ordinal"
+                        " \n 3 One Hot \n 4 for target \n 6 for drop: \n ")
 
                     if method == '0':
                         col_bool = True
+
                     if method == '1':
                         le = LabelEncoder()
-                        self.df[col] = le.fit_transform(self.df[col].astype(str))
-                        print(self.df[col])
-                        sleep(1.5)
+                        label_encode_nominal(col)
                         col_bool = True
+
                     if method == '2':
-                        mapping_bool = False
-                        while mapping_bool == False:
-                            map_dic = {}
-                            working = False
-                            while working == False:
-                                map_list = []
-                                print(self.df[col].unique())
-                                input_string = input('Enter mapping list separated by space ')
-                                print("\n")
-                                user_list = input_string.split()
-
-                                # convert each item to int type
-                                for i in range(len(user_list)):
-                                    # convert each item to int type
-                                    map_list.append(int(user_list[i]))
-                                if len(map_list) != len(self.df[col].unique()):
-                                    print("len of values or format doesn't seem to match... \n")
-                                else:
-                                    working = True
-
-                            for i in range(len(self.df[col].unique())):
-                                map_dic[self.df[col].unique()[i]] = map_list[i]
-                            print(map_dic, '\n')
-                            final_check = input('Does the mapping look correct 0 for yes 1 for no: \n')
-                            if final_check == '0':
-                                self.df[col] = self.df[col].map(map_dic)
-                                print(self.df[col])
-                                sleep(1.5)
-                                mapping_bool = True
-                            else:
-                                pass
+                        map_ordinal(col)
                         col_bool = True
+
                     if method == '4':
-                        self.df['Target'] = self.df[col]
-                        self.df = self.df.drop(axis=1, columns=[col])
+                        set_target(col)
                         target_change = input('Do you want to change the target further 0 for yes 1 for no: ')
                         if target_change == '0':
                             col = "Target"
                         else:
                             col_bool = True
+
                     if method == '6':
-                        self.df = self.df.drop(axis=1, columns=[col])
-                        print('\n')
-                        print('Column Dropped')
-                        sleep(1.5)
+                        drop_col(col)
                         col_bool = True
+
                 print('\n')
                 print('--------------------------------------------------------------')
 
@@ -143,108 +163,54 @@ class Clean:
             if col[0] in col_list:
                 index_bool = False
 
-
             if format_type == 0:
                 pass
+
             # nominal feature
             elif format_type == 1:
-                print('here')
                 le = LabelEncoder()
                 if index_bool is True:
                     for i in col:
-                        self.df[col_list[i]] = le.fit_transform(self.df[col_list[i]].astype(str))
-                        print(self.df[col_list[i]])
-                        sleep(1.5)
+                        col_found = col_list[i]
+                        label_encode_nominal(col_found)
                 elif index_bool is False:
                     for col in col:
-                        self.df[col] = le.fit_transform(self.df[col].astype(str))
-                        print(self.df[col])
-                        sleep(1.5)
+                        label_encode_nominal(col)
+
             # ordinal features
             elif format_type == 2:
 
                 if index_bool is True:
                     for i in col:
-                        print(i)
-                        mapping_bool = False
-                        while mapping_bool == False:
-                            map_dic = {}
-                            working = False
-                            while working == False:
-                                map_list = []
-                                print(self.df[col_list[i]].unique())
-                                input_string = input('Enter mapping list separated by space ')
-                                print("\n")
-                                user_list = input_string.split()
+                        col_found = col_list[i]
+                        map_ordinal(col_found)
 
-                                # convert each item to int type
-                                for j in range(len(user_list)):
-                                    # convert each item to int type
-                                    map_list.append(int(user_list[j]))
-                                if len(map_list) != len(self.df[col_list[i]].unique()):
-                                    print("len of values or format doesn't seem to match... \n")
-                                else:
-                                    working = True
-
-                            for j in range(len(self.df[col_list[i]].unique())):
-                                map_dic[self.df[col_list[i]].unique()[j]] = map_list[j]
-                            print(map_dic, '\n')
-                            final_check = input('Does the mapping look correct 0 for yes 1 for no: \n')
-                            if final_check == '0':
-                                self.df[col_list[i]] = self.df[col_list[i]].map(map_dic)
-                                print(self.df[col_list[i]])
-                                sleep(1.5)
-                                mapping_bool = True
-                            else:
-                                pass
                 elif index_bool is False:
                     for col in col:
-                        mapping_bool = False
-                        while mapping_bool == False:
-                            map_dic = {}
-                            working = False
-                            while working == False:
-                                map_list = []
-                                print(self.df[col].unique())
-                                input_string = input('Enter mapping list separated by space ')
-                                print("\n")
-                                user_list = input_string.split()
+                        map_ordinal(col)
 
-                                # convert each item to int type
-                                for i in range(len(user_list)):
-                                    # convert each item to int type
-                                    map_list.append(int(user_list[i]))
-                                if len(map_list) != len(self.df[col].unique()):
-                                    print("len of values or format doesn't seem to match... \n")
-                                else:
-                                    working = True
-
-                            for i in range(len(self.df[col].unique())):
-                                map_dic[self.df[col].unique()[i]] = map_list[i]
-                            print(map_dic, '\n')
-                            final_check = input('Does the mapping look correct 0 for yes 1 for no: \n')
-                            if final_check == '0':
-                                self.df[col] = self.df[col].map(map_dic)
-                                print(self.df[col])
-                                sleep(1.5)
-                                mapping_bool = True
-                            else:
-                                pass
-            # one hot ecnconding
+            # one hot encoding
             elif format_type == 3:
-                pass
-            # target
-            if index_bool is True:
-                for i in col:
-                        self.df['Target'] = self.df[col_list[i]]
-                        self.df = self.df.drop(axis=1, columns=[col_list[i]])
-            elif index_bool is False:
-                for col in col:
-                    self.df['Target'] = self.df[col]
-                    self.df = self.df.drop(axis=1, columns=[col])
+                # target
+                if index_bool is True:
+                    for i in col:
+                        col_found = col_list[i]
+                        set_target(col_found)
+
+                elif index_bool is False:
+                    for col in col:
+                        set_target(col)
+
             # drop
             elif format_type == 6:
-                pass
+                if index_bool is True:
+                    for i in col:
+                        col_found = col_list[i]
+                        drop_col(col_found)
+
+                elif index_bool is False:
+                    for col in col:
+                        drop_col(col)
         print('--------------------------------------------------------------')
 
     # returns different statistics based on entry level
