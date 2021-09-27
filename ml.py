@@ -44,11 +44,13 @@ class Ml:
             gs = GridSearchCV(estimator=model_type, param_grid=params, scoring='accuracy', cv=5, n_jobs=-1,
                               verbose=2)
             grid = gs.fit(self.x_train, self.y_train)
+            print('--------------------------------------------------------------')
             print(grid.best_params_)
             yscore = grid.predict(self.x_test)
             yscoretrain = grid.predict(self.x_train)
             print('Training Accuracy Score: ' + str(acc(self.y_train, yscoretrain)))
             print('Accuracy Score: ' + str(acc(self.y_test, yscore)))
+            print('--------------------------------------------------------------')
 
         # does a quick model
         def quick_mod(model_type):
@@ -56,9 +58,11 @@ class Ml:
             quick_model.fit(self.x_train, self.y_train)
             yscore = quick_model.predict(self.x_test)
             yscoretrain = quick_model.predict(self.x_train)
+            print('--------------------------------------------------------------')
             print(str(quick_model))
             print('Training Accuracy Score: ' + str(acc(self.y_train, yscoretrain)))
             print('Accuracy Score: ' + str(acc(self.y_test, yscore)))
+            print('--------------------------------------------------------------')
 
         if mod == 'SVM':
             if hyper is not None:

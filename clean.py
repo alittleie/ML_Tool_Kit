@@ -100,7 +100,7 @@ class Clean:
             self.df = self.df.drop(axis=1, columns=[col_in])
             print('\n')
             print('Column Dropped')
-            sleep(1.5)
+
 
         def buckets(col_in, buckets_count=2 ):
             bucket_points = None
@@ -187,8 +187,13 @@ class Clean:
 
 
 
-            else:
-                pass
+        def dummies(col_in):
+            dum = pd.get_dummies(self.df[col_in])
+            self.df = pd.concat([self.df, dum], axis=1)
+            self.df = self.df.drop(axis=1, columns=[col_in])
+            print(self.df.head())
+
+
         print('--------------------------------------------------------------')
 
         # this is basic conversion of data and target selection going through each column manually
@@ -298,6 +303,15 @@ class Clean:
                     for col in col:
                         buckets(col, buckets_count=num_buckets)
 
+            elif format_type == 'dummies':
+                if index_bool is True:
+                    for i in col:
+                        col_found = col_list[i]
+                        dummies(col_found)
+
+                elif index_bool is False:
+                    for col in col:
+                        dummies(col)
             # drop
             elif format_type == 'drop':
                 if index_bool is True:
