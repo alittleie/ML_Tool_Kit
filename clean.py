@@ -50,7 +50,7 @@ class Clean:
         print('--------------------------------------------------------------')
 
     # segment to either auto format columns or go through individually to convert to usable format
-    def format(self, level, format_type=0, col=None, auto=False):
+    def format(self,  format_type=None, col=None, auto=False, num_buckets = 2):
 
         def label_encode_nominal(col_in):
             self.df[col_in] = le.fit_transform(self.df[col_in].astype(str))
@@ -94,6 +94,7 @@ class Clean:
         def set_target(col_in):
             self.df['Target'] = self.df[col_in]
             self.df = self.df.drop(axis=1, columns=[col_in])
+            print(col_in, 'set as Target.')
 
         def drop_col(col_in):
             self.df = self.df.drop(axis=1, columns=[col_in])
@@ -101,11 +102,43 @@ class Clean:
             print('Column Dropped')
             sleep(1.5)
 
-        print('\n')
+        def buckets(col_in, buckets_count=2 ):
+            mean = self.df[col_in].mean()
+            max_val = self.df[col_in].max()
+            min_val = self.df[col_in].min()
+            print("Mean: %f, Min: %f, Max %f" % (mean, min_val, max_val))
+            print("Number of Buckets for Target Encoding %d" % num_buckets)
+            bucket_method = input('Do you want to manully define cut off points? 1 for Yes 0 for No ' )
+            if bucket_method == '1':
+                bucket_bool = False
+                while bucket_bool is False:
+                    bucket_points = None
+                    bucket_points = input("%d Buckets Spaces were Selected enter %d values: " % (buckets_count, buckets_count-1))
+                    if len(bucket_points) == buckets_count:
+                        print(bucket_points)
+                        last_bucket_check = input("Do the Bucket Points look correct? 1 for Yes 0 for No ")
+                        if last_bucket_check == '1':
+                            bucket_bool = True
+                        else:
+                            pass
+                if buckets_count == 2:
+                    map_val = []
+                    for k in range(len(self.df)):
+                        if self.df[col_in].iloc[k] < float(bucket_points):
+                            map_val.append(0)
+                        else:
+                            map_val.append(1)
+                    self.df[col_in] = map_val
+                    print(self.df[col_in].head())
+
+
+
+            else:
+                pass
         print('--------------------------------------------------------------')
 
         # this is basic conversion of data and target selection going through each column manually
-        if level == 0 and auto is False:
+        if auto is True:
             # loops through each column
             j = len(self.df.columns)
             counter = 0
@@ -152,22 +185,21 @@ class Clean:
                         drop_col(col)
                         col_bool = True
 
-                print('\n')
                 print('--------------------------------------------------------------')
 
         # this segment allows you to choose formatting type by col
-        elif level == 1 and auto is False:
+        elif auto is False:
             index_bool = True
             col_list = self.df.columns
 
             if col[0] in col_list:
                 index_bool = False
 
-            if format_type == 0:
+            if format_type is None:
                 pass
 
             # nominal feature
-            elif format_type == 1:
+            elif format_type == 'label_encode':
                 le = LabelEncoder()
                 if index_bool is True:
                     for i in col:
@@ -178,7 +210,7 @@ class Clean:
                         label_encode_nominal(col)
 
             # ordinal features
-            elif format_type == 2:
+            elif format_type == 'dic_map':
 
                 if index_bool is True:
                     for i in col:
@@ -190,7 +222,7 @@ class Clean:
                         map_ordinal(col)
 
             # one hot encoding
-            elif format_type == 3:
+            elif format_type == 'target':
                 # target
                 if index_bool is True:
                     for i in col:
@@ -201,8 +233,19 @@ class Clean:
                     for col in col:
                         set_target(col)
 
+            # bucket_encode
+            elif format_type == 'bucket':
+                if index_bool is True:
+                    for i in col:
+                        col_found = col_list[i]
+                        buckets(col_found)
+
+                elif index_bool is False:
+                    for col in col:
+                        buckets(col, buckets_count=num_buckets)
+
             # drop
-            elif format_type == 6:
+            elif format_type == 'drop':
                 if index_bool is True:
                     for i in col:
                         col_found = col_list[i]

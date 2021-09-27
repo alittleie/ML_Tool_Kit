@@ -62,7 +62,7 @@ class Ml:
 
         if mod == 'SVM':
             if hyper is not None:
-                model = svm.SVC(kernel='poly', gamma=3, C=5, coef0=5)
+                model = svm.SVC(kernel='poly', gamma=3, C=5, coef0=5, verbose= 2)
                 param_grid = [[{'kernel': ['rbf'], 'gamma': [10, 20, 40, 90, 100, 200], 'C': [1], 'coef0': [.01],
                                 'probability': [True]}],
                               [{'kernel': ['rbf'], 'gamma': [10, 15, 20, 25, 30, 40, 50, 70, 90, 100, 150, 200],
