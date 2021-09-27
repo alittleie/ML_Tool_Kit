@@ -103,6 +103,7 @@ class Clean:
             sleep(1.5)
 
         def buckets(col_in, buckets_count=2 ):
+            bucket_points = None
             mean = self.df[col_in].mean()
             max_val = self.df[col_in].max()
             min_val = self.df[col_in].min()
@@ -112,24 +113,77 @@ class Clean:
             if bucket_method == '1':
                 bucket_bool = False
                 while bucket_bool is False:
-                    bucket_points = None
                     bucket_points = input("%d Buckets Spaces were Selected enter %d values: " % (buckets_count, buckets_count-1))
-                    if len(bucket_points) == buckets_count:
+
+                    bucket_points = (bucket_points.split())
+                    [float(val) for val in bucket_points]
+
+                    if len(bucket_points) == buckets_count-1:
                         print(bucket_points)
                         last_bucket_check = input("Do the Bucket Points look correct? 1 for Yes 0 for No ")
                         if last_bucket_check == '1':
                             bucket_bool = True
                         else:
                             pass
+                map_val = []
                 if buckets_count == 2:
-                    map_val = []
                     for k in range(len(self.df)):
-                        if self.df[col_in].iloc[k] < float(bucket_points):
+                        if self.df[col_in].iloc[k] < float(bucket_points[0]):
                             map_val.append(0)
                         else:
                             map_val.append(1)
-                    self.df[col_in] = map_val
-                    print(self.df[col_in].head())
+
+                elif buckets_count == 3:
+                    bucket_points.sort()
+                    for k in range(len(self.df)):
+                        if self.df[col_in].iloc[k] < float(bucket_points[0]):
+                            map_val.append(0)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[1]):
+                            map_val.append(1)
+                        else:
+                            map_val.append(2)
+                elif buckets_count == 4:
+                    bucket_points.sort()
+                    for k in range(len(self.df)):
+                        if self.df[col_in].iloc[k] < float(bucket_points[0]):
+                            map_val.append(0)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[1]):
+                            map_val.append(1)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[2]):
+                            map_val.append(2)
+                        else:
+                            map_val.append(3)
+                elif buckets_count == 5:
+                    bucket_points.sort()
+                    for k in range(len(self.df)):
+                        if self.df[col_in].iloc[k] < float(bucket_points[0]):
+                            map_val.append(0)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[1]):
+                            map_val.append(1)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[2]):
+                            map_val.append(2)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[3]):
+                            map_val.append(3)
+                        else:
+                            map_val.append(4)
+                elif buckets_count == 6:
+                    bucket_points.sort()
+                    for k in range(len(self.df)):
+                        if self.df[col_in].iloc[k] < float(bucket_points[0]):
+                            map_val.append(0)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[1]):
+                            map_val.append(1)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[2]):
+                            map_val.append(2)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[3]):
+                            map_val.append(3)
+                        elif self.df[col_in].iloc[k] < float(bucket_points[4]):
+                            map_val.append(4)
+                        else:
+                            map_val.append(5)
+
+                self.df[col_in] = map_val
+                print(self.df[col_in].head())
 
 
 
